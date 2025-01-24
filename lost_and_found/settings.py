@@ -158,3 +158,4 @@ ALLOWED_HOSTS = ['*', '192.168.1.3']  # You can specify '*' to allow all hosts i
 CSRF_COOKIE_NAME = "csrftoken"  # Ensure this is set
 CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
 
+DEBUG = True

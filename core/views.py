@@ -16,6 +16,8 @@ from django.core.files.storage import default_storage
 from django.contrib.auth import get_user_model
 from .models import LostItem
 from django.utils.dateparse import parse_date
+from datetime import datetime
+
 
 # @csrf_exempt
 def signup(request):
@@ -167,47 +169,72 @@ def update_profile(request):
     else:
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
     
-
 @csrf_exempt
 def submit_lost_item(request):
     if request.method == 'POST':
-        # Get data from request body (assuming JSON)
-        data = json.loads(request.body)
-
-        # Fetch details from the request (name and mobile should be fetched from localStorage)
-        name = data.get('name')  # Name from localStorage
-        mobile_number = data.get('mobile_number')  # Mobile number from localStorage
-        location = data.get('location')
-        lost_item_name = data.get('lost_item_name')
-        description = data.get('description')
-        date_lost = data.get('date_lost')  # Date when the item was lost (should be in 'dd/mm/yyyy' format)
-        image = data.get('image')  # Image file (if any)
-
-        if not (name and mobile_number and location and lost_item_name and description and date_lost):
-            return JsonResponse({'error': 'Missing required fields.'}, status=400)
-
         try:
-            # Convert date format from dd/mm/yyyy to yyyy-mm-dd
-            date_lost = parse_date(date_lost)
+            # Handle form-data separately
+            if request.content_type.startswith('multipart/form-data'):
+                # Parse form-data
+                name = request.POST.get('name')
+                mobile_number = request.POST.get('mobile_number')
+                location = request.POST.get('location')
+                lost_item_name = request.POST.get('lost_item_name')
+                description = request.POST.get('description')
+                date_lost = request.POST.get('date_lost')
+                image = request.FILES.get('image')
 
-            # Create a new LostItem object
-            lost_item = LostItem(
-                name=name,
-                mobile_number=mobile_number,
-                location=location,
-                lost_item_name=lost_item_name,
-                description=description,
-                date_lost=date_lost
-            )
+                # Validate required fields
+                if not (name and mobile_number and location and lost_item_name and description and date_lost):
+                    return JsonResponse({'error': 'Missing required fields.'}, status=400)
 
-            if image:
-                lost_item.image = image  # Assign the image if provided
+                # Parse and validate date
+                try:
+                    date_lost = datetime.strptime(date_lost, '%d/%m/%Y').date()
+                except ValueError:
+                    return JsonResponse({'error': 'Invalid date format. Use dd/mm/yyyy.'}, status=400)
 
-            lost_item.save()  # Save the object to the database
+                # Save the lost item
+                lost_item = LostItem(
+                    name=name,
+                    mobile_number=mobile_number,
+                    location=location,
+                    lost_item_name=lost_item_name,
+                    description=description,
+                    date_lost=date_lost,
+                    image=image
+                )
+                lost_item.save()
 
-            return JsonResponse({'message': 'Lost item submitted successfully!'}, status=201)
+                return JsonResponse({'message': 'Lost item submitted successfully!'}, status=201)
+
+            return JsonResponse({'error': 'Unsupported content type.'}, status=400)
 
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
-    
+
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
+@csrf_exempt
+def get_recent_lost_items(request):
+    try:
+        # Retrieve the most recent 9 lost items ordered by the 'date_lost' field
+        recent_lost_items = LostItem.objects.all().order_by('-date_lost')[:9]
+
+        # Create a list of dictionaries to hold the lost item data
+        lost_items_data = []
+        for item in recent_lost_items:
+            lost_items_data.append({
+                'name': item.name,
+                'mobile_number': item.mobile_number,
+                'location': item.location,
+                'lost_item_name': item.lost_item_name,
+                'description': item.description,
+                'date_lost': item.date_lost.strftime('%d/%m/%Y'),
+                'image': item.image.url if item.image else None,  # Add image URL if available
+            })
+
+        return JsonResponse({'recent_lost_items': lost_items_data}, status=200)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
