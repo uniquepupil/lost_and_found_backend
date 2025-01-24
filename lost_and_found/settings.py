@@ -25,7 +25,6 @@ SECRET_KEY = 'django-insecure-8smodfzh-e2s)tk8*vyyxgs!wypa)u!6ohag+2epg$g0h%0%4r
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -39,17 +38,25 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'core',
     'corsheaders',
+    'rest_framework',
+    'rest_framework_simplejwt',
 ]
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    #'django.middleware.csrf.CsrfViewMiddleware',
+     
 ]
 
 ROOT_URLCONF = 'lost_and_found.urls'
@@ -132,4 +139,22 @@ MEDIA_ROOT = BASE_DIR / 'media'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # or your frontend's URL
 ]
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Use DB-backed sessions
+SESSION_COOKIE_NAME = 'sessionid'
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Retain session after browser close
+SESSION_COOKIE_AGE = 3600  # 1 hour, adjust as needed
+CSRF_TRUSTED_ORIGINS = [
+    'http://192.168.1.3:3000',
+    'http://localhost:3000'
+]
+
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+ALLOWED_HOSTS = ['*', '192.168.1.3']  # You can specify '*' to allow all hosts in development
+
+
+CSRF_COOKIE_NAME = "csrftoken"  # Ensure this is set
+CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
 
