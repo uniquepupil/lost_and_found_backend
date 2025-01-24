@@ -3,6 +3,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone    
 import random
+from django.conf import settings
 
 
 
@@ -60,3 +61,18 @@ class OTP(models.Model):
         self.otp_code = str(random.randint(100000, 999999))
         self.save()
 
+class LostItem(models.Model):
+    name = models.CharField(max_length=255)  # To store the name fetched from localStorage
+    mobile_number = models.CharField(max_length=15)  # To store the mobile number fetched from localStorage
+    location = models.CharField(max_length=255)  # Location where the item was lost
+    lost_item_name = models.CharField(max_length=255)  # Name of the lost item
+    description = models.TextField()  # Description of the lost item
+    date_lost = models.DateField()  # Date when the item was lost (dd/mm/yyyy format)
+    image = models.ImageField(upload_to='lost_items/', null=True, blank=True)  # Image of the lost item
+    
+    def __str__(self):
+        return f"Lost Item: {self.lost_item_name} by {self.name}"
+
+    class Meta:
+        verbose_name = 'Lost Item'
+        verbose_name_plural = 'Lost Items'

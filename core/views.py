@@ -14,6 +14,8 @@ from django.shortcuts import get_object_or_404
 from django.core.files.storage import default_storage
 # from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
+from .models import LostItem
+from django.utils.dateparse import parse_date
 
 # @csrf_exempt
 def signup(request):
@@ -69,7 +71,10 @@ def login_view(request):
                 return JsonResponse({
                     'message': 'Login successful.',
                     'access_token': access_token,
-                    'user': {'name': user.name, 'email': user.email}
+                    'user': {
+                        'name': user.name,
+                          'email': user.email,
+                          'mobile_number': user.mobile_number}
                 }, status=200)
             else:
                 return JsonResponse({'error': 'Invalid email or password.'}, status=401)
@@ -78,6 +83,7 @@ def login_view(request):
             return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
     else:
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
 
 def verify_otp(request):
     if request.method == 'POST':
@@ -160,3 +166,48 @@ def update_profile(request):
 
     else:
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
+    
+
+@csrf_exempt
+def submit_lost_item(request):
+    if request.method == 'POST':
+        # Get data from request body (assuming JSON)
+        data = json.loads(request.body)
+
+        # Fetch details from the request (name and mobile should be fetched from localStorage)
+        name = data.get('name')  # Name from localStorage
+        mobile_number = data.get('mobile_number')  # Mobile number from localStorage
+        location = data.get('location')
+        lost_item_name = data.get('lost_item_name')
+        description = data.get('description')
+        date_lost = data.get('date_lost')  # Date when the item was lost (should be in 'dd/mm/yyyy' format)
+        image = data.get('image')  # Image file (if any)
+
+        if not (name and mobile_number and location and lost_item_name and description and date_lost):
+            return JsonResponse({'error': 'Missing required fields.'}, status=400)
+
+        try:
+            # Convert date format from dd/mm/yyyy to yyyy-mm-dd
+            date_lost = parse_date(date_lost)
+
+            # Create a new LostItem object
+            lost_item = LostItem(
+                name=name,
+                mobile_number=mobile_number,
+                location=location,
+                lost_item_name=lost_item_name,
+                description=description,
+                date_lost=date_lost
+            )
+
+            if image:
+                lost_item.image = image  # Assign the image if provided
+
+            lost_item.save()  # Save the object to the database
+
+            return JsonResponse({'message': 'Lost item submitted successfully!'}, status=201)
+
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    return JsonResponse({'error': 'Invalid request method.'}, status=405)
