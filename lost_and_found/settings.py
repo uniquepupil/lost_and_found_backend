@@ -128,23 +128,20 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
+
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'core.User'
 
-# # Other settings
-# MEDIA_URL = '/media/'
-# MEDIA_ROOT = BASE_DIR / 'media'
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # or your frontend's URL
+    "http://localhost:3000", 
+    'https://your-netlify-site-name.netlify.app',
 ]
 
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Use DB-backed sessions
+SESSION_ENGINE = 'django.contrib.sessions.backends.db' 
 SESSION_COOKIE_NAME = 'sessionid'
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Retain session after browser close
-SESSION_COOKIE_AGE = 3600  # 1 hour, adjust as needed
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  
+SESSION_COOKIE_AGE = 200  
 CSRF_TRUSTED_ORIGINS = [
     'http://192.168.1.3:3000',
     'http://localhost:3000'
@@ -153,10 +150,10 @@ CSRF_TRUSTED_ORIGINS = [
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-ALLOWED_HOSTS = ['*', '192.168.1.3']  # You can specify '*' to allow all hosts in development
+ALLOWED_HOSTS = ['*', '192.168.1.3' , 'https://your-netlify-site-name.netlify.app'] 
 
 
-CSRF_COOKIE_NAME = "csrftoken"  # Ensure this is set
+CSRF_COOKIE_NAME = "csrftoken"  
 CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
 
 DEBUG = True
@@ -164,5 +161,5 @@ DEBUG = True
 
 
 
-MEDIA_URL = '/media/'  # URL that handles the media served from MEDIA_ROOT
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Absolute path to the directory to store media files
+MEDIA_URL = '/media/'  
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media') 
