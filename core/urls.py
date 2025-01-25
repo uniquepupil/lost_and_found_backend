@@ -9,5 +9,6 @@ urlpatterns = [
     path('update-profile/', views.update_profile, name='update_profile'),
     path('submit-lost-item/', views.submit_lost_item, name='submit_lost_item'),
     path('recent-lost-items/', views.get_recent_lost_items, name='recent_lost_items'),
-    
+    path('submit-found-item/', views.submit_found_item, name='submit_found_item'),
+    path('recent-found-items/', views.get_recent_found_items, name='recent_found_item'),
 ]

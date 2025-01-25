@@ -15,6 +15,7 @@ from django.core.files.storage import default_storage
 # from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 from .models import LostItem
+from .models import FoundItem
 from django.utils.dateparse import parse_date
 from datetime import datetime
 
@@ -219,7 +220,7 @@ def submit_lost_item(request):
 def get_recent_lost_items(request):
     try:
         # Retrieve the most recent 9 lost items ordered by the 'date_lost' field
-        recent_lost_items = LostItem.objects.all().order_by('-date_lost')[:9]
+        recent_lost_items = LostItem.objects.all().order_by('-date_lost')
 
         # Create a list of dictionaries to hold the lost item data
         lost_items_data = []
@@ -235,6 +236,77 @@ def get_recent_lost_items(request):
             })
 
         return JsonResponse({'recent_lost_items': lost_items_data}, status=200)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@csrf_exempt
+def submit_found_item(request):
+    if request.method == 'POST':
+        try:
+            # Handle form-data separately
+            if request.content_type.startswith('multipart/form-data'):
+                # Parse form-data
+                name = request.POST.get('name')
+                mobile_number = request.POST.get('mobile_number')
+                location = request.POST.get('location')
+                found_item_name = request.POST.get('found_item_name')
+                description = request.POST.get('description')
+                date_found = request.POST.get('date_found')
+                image = request.FILES.get('image')
+
+                # Validate required fields
+                if not (name and mobile_number and location and found_item_name and description and date_found):
+                    return JsonResponse({'error': 'Missing required fields.'}, status=400)
+
+                # Parse and validate date
+                try:
+                    date_found = datetime.strptime(date_found, '%d/%m/%Y').date()
+                except ValueError:
+                    return JsonResponse({'error': 'Invalid date format. Use dd/mm/yyyy.'}, status=400)
+
+                # Save the found item
+                found_item = FoundItem(
+                    name=name,
+                    mobile_number=mobile_number,
+                    location=location,
+                    found_item_name=found_item_name,
+                    description=description,
+                    date_found=date_found,
+                    image=image
+                )
+                found_item.save()
+
+                return JsonResponse({'message': 'Found item submitted successfully!'}, status=201)
+
+            return JsonResponse({'error': 'Unsupported content type.'}, status=400)
+
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
+@csrf_exempt
+def get_recent_found_items(request):
+    try:
+        # Retrieve the most recent 9 found items ordered by the 'date_found' field
+        recent_found_items = FoundItem.objects.all().order_by('-date_found')[:9]
+
+        # Create a list of dictionaries to hold the found item data
+        found_items_data = []
+        for item in recent_found_items:
+            found_items_data.append({
+                'name': item.name,
+                'mobile_number': item.mobile_number,
+                'location': item.location,
+                'found_item_name': item.found_item_name,
+                'description': item.description,
+                'date_found': item.date_found.strftime('%d/%m/%Y'),
+                'image': item.image.url if item.image else None,  # Add image URL if available
+            })
+
+        return JsonResponse({'recent_found_items': found_items_data}, status=200)
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)

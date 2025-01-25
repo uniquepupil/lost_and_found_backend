@@ -76,3 +76,19 @@ class LostItem(models.Model):
     class Meta:
         verbose_name = 'Lost Item'
         verbose_name_plural = 'Lost Items'
+
+class FoundItem(models.Model):
+    name = models.CharField(max_length=255)  # Name of the person who found the item
+    mobile_number = models.CharField(max_length=15)  # Mobile number of the person who found the item
+    location = models.CharField(max_length=255)  # Location where the item was found
+    found_item_name = models.CharField(max_length=255)  # Name of the found item
+    description = models.TextField()  # Description of the found item
+    date_found = models.DateField()  # Date when the item was found (dd/mm/yyyy format)
+    image = models.ImageField(upload_to='found_items/', null=True, blank=True)  # Image of the found item
+    
+    def __str__(self):
+        return f"Found Item: {self.found_item_name} by {self.name}"
+
+    class Meta:
+        verbose_name = 'Found Item'
+        verbose_name_plural = 'Found Items'

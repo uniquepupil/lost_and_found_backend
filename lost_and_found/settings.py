@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -133,9 +134,9 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'core.User'
 
-# Other settings
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# # Other settings
+# MEDIA_URL = '/media/'
+# MEDIA_ROOT = BASE_DIR / 'media'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # or your frontend's URL
 ]
@@ -159,3 +160,9 @@ CSRF_COOKIE_NAME = "csrftoken"  # Ensure this is set
 CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
 
 DEBUG = True
+
+
+
+
+MEDIA_URL = '/media/'  # URL that handles the media served from MEDIA_ROOT
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Absolute path to the directory to store media files
