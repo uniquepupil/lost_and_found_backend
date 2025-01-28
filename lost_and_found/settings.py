@@ -145,6 +145,7 @@ SESSION_COOKIE_AGE = 200
 CSRF_TRUSTED_ORIGINS = [
     'http://192.168.1.3:3000',
     'http://localhost:3000'
+    'https://your-netlify-site-name.netlify.app'
 ]
 
 
